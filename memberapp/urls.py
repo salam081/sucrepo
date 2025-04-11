@@ -9,7 +9,7 @@ urlpatterns = [
     path('ajax/load-bank-code/', views.ajax_load_bank_code, name='ajax_load_bank_code'),
     path('member_request_consumable/', views.member_request_consumable, name='member_request_consumable'),
     path('edit-request/<int:request_id>/', views.edit_consumable_request, name='edit_consumable_request'),
-
+    path('member_savings',views.member_savings,name='member_savings')
    
     
 ]

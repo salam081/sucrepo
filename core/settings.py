@@ -25,10 +25,10 @@ SECRET_KEY = 'django-insecure-1nyiiw)z)&8vug8vd(^$k7#=ktj)!_aset5)3nb_x@!m^5^n(5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = ['sucrepo.onrender.com']
+ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['sucrepo.onrender.com']
 
-CSRF_TRUSTED_ORIGINS = ['https://sucrepo.onrender.com']
+# CSRF_TRUSTED_ORIGINS = ['https://sucrepo.onrender.com']
 
 
 
@@ -67,10 +67,10 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'core.urls'
 
 # opional, as this will log you out when browser is closed
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-SESSION_COOKIE_AGE = 900                   # 0r 5 * 60, same thing
-# Will prrevent from logging you out after 300 seconds
-SESSION_SAVE_EVERY_REQUEST = True
+# SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+# SESSION_COOKIE_AGE = 900                   # 0r 5 * 60, same thing
+# # Will prrevent from logging you out after 300 seconds
+# SESSION_SAVE_EVERY_REQUEST = True
 
 TEMPLATES = [
     {

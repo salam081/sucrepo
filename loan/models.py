@@ -9,7 +9,10 @@ class LoanSettings(models.Model):
     allow_loan_requests = models.BooleanField(default=True)
     allow_consumable_requests = models.BooleanField(default=True)
     created_by = models.ForeignKey(User,on_delete=models.CASCADE)
-
+    
+    # def __str__(self):
+    #     return f"{self.allow_loan_requests} ({self.allow_consumable_requests})"
+     
 
 class BankName(models.Model):
      name = models.CharField(max_length=100)

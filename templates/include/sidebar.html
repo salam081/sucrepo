@@ -50,7 +50,9 @@
             <div class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-table me-2"></i>Loan</a>
                 <div class="dropdown-menu bg-transparent border-0">
+                   
                     <a href="{% url 'requested_loan' %}" class="dropdown-item mb-2"> Approve Loan Request</a>
+                    <a href="{% url 'add_loan_type' %}" class="dropdown-item mb-2"> Add Type Loan</a>
                     <a href="{% url 'loan_years_list' %}" class="dropdown-item mb-2">  Loan Request List </a>
                     <a href="{% url 'all_reject_loan' %}" class="dropdown-item mb-2">  All Reject loan</a>
                     <a href="{% url 'upload_loan_repayback' %}" class="dropdown-item mb-2">Upload Loan Payment</a>
@@ -61,8 +63,9 @@
             <div class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-table me-2"></i>Consumable</a>
                 <div class="dropdown-menu bg-transparent border-0">
-                    <!-- <a href="{% url 'upload_users' %}" class="dropdown-item">Consumable Request</a> -->
-                    <a href="{% url 'consumable_requests_list' %}" class="dropdown-item mb-2">Consumable Request</a>
+                    <a href="{% url 'consumable_items' %}" class="dropdown-item">Consumable Items</a>
+                    <a href="{% url 'consumable_requests_list' %}" class="dropdown-item mb-2">Approve Consumable</a>
+                    <a href="{% url 'consumable_requests_by_month' %}" class="dropdown-item mb-2">All Consumable By Month</a>
                     <a href="{% url 'upload_consumable_payment' %}" class="dropdown-item mb-2">Upload Consumable Payments</a>
                     <a href="{% url 'add_single_consumable_payment' %}" class="dropdown-item mb-2">Add single Payments</a>
 
@@ -72,6 +75,7 @@
            
             {% else %}
             <a href="{% url 'member_dashboard' %}" class="nav-item nav-link active"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</a>
+            <a href="{% url 'member_savings' %}" class="nav-item nav-link active"><i class="fa fa-chart-bar me-2"></i>My Savings</a>
             <a href="{% url 'loan_request' %}" class="nav-item nav-link active"><i class="fa fa-chart-bar me-2"></i>Request Loan</a>
             <a href="{% url 'member_request_consumable' %}" class="nav-item nav-link active"><i class="fa fa-chart-bar me-2"></i>Consumable</a>
             

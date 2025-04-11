@@ -120,7 +120,7 @@ def user_registration(request):
         first_name = request.POST.get("first_name")
         last_name = request.POST.get("last_name")
         other_name = request.POST.get("other_name")
-        username = request.POST.get("username")
+        username = request.POST.get("username", "").strip().lower()
         date_of_birth = request.POST.get("date_of_birth")
         department = request.POST.get("department")
         unit = request.POST.get("unit")
@@ -176,9 +176,10 @@ def user_registration(request):
 
 def login_view(request):
     if request.method == "POST":
-        username = request.POST.get("username")
+        # username = request.POST.get("username")
+        username = request.POST.get("username", "").strip().lower()
         password = request.POST.get("password")
-        default_password = "pass1234"
+        default_password = "pass"
 
         try:
             user = User.objects.get(username=username)

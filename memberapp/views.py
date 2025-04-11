@@ -117,7 +117,6 @@ def ajax_load_bank_code(request):
         return JsonResponse({'code': ''})
 
 
-
 def loan_request_view(request):
     settings = LoanSettings.objects.first()
     if not settings or not settings.allow_loan_requests:
@@ -337,6 +336,19 @@ def edit_consumable_request(request, request_id):
     # Pre-fill form on GET
     return render(request, 'consumables/edit_request.html', {'items': items,'details': details,'request_obj': consumable_request})
 
+def member_savings(request):
+    try:
+        member = Member.objects.get(member=request.user)
+    except Member.DoesNotExist:
+        return redirect('login')
+    savings = Savings.objects.filter(member=member)#.aggregate(
+    #     total=Sum('month_saving')
+    #  )['total'] or 0
+    total_savings = Savings.objects.filter(member=member).aggregate(
+        total=Sum('month_saving')
+    )['total'] or 0
+    print(savings,'savings')
+    return render(request, 'member/member_savings.html', {'savings': savings,'total_savings':total_savings})
 
 
 

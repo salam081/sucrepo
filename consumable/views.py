@@ -7,6 +7,10 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 import pandas as pd
 from django.db import transaction
+from django.db.models.functions import TruncMonth
+from django.db.models import Count, Sum, F, Q
+from collections import defaultdict
+from datetime import datetime
 from decimal import Decimal
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -16,6 +20,130 @@ from django.utils.dateparse import parse_date
 
 from django.contrib.admin.views.decorators import staff_member_required
 
+
+def add_consumables_items(request):
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        price = request.POST.get('price')
+        Item.objects.create(title=title,price=price,available=True)
+        messages.success(request,'Item Added Successfully')
+        return redirect('consumable_items')
+    
+def delete_item(request,id):
+    itemObj = get_object_or_404(Item, id=id)
+    itemObj.delete()
+    messages.success(request, 'Consumable item Deleted successfully')
+    return redirect('consumable_items')
+
+# def consumable_items(request):
+#     consumables = Item.objects.all()
+#     if request.method == 'POST':
+#         title = request.POST.get('title')
+#         price = request.POST.get('price')
+#         item_id = request.POST.get('item_id')
+#         if item_id:
+#             item = get_object_or_404(Item, id=item_id)
+#             item.available = not item.available
+#             item.save()
+#             messages.success(request, 'Consumable item updated successfully')
+#             return redirect('consumable_items')
+        
+#          # Editing  meal logic
+#         if item_id:  
+#             item = get_object_or_404(Item, id=item_id)
+#             item.title = title
+#             item.price = price
+#             item.save()
+#         else:
+#             messages.error(request, 'Item ID not provided.')
+#             return redirect('consumable_items')
+#     context = {'consumables':consumables}
+#     return render(request,"consumables/consumable_items.html",context)
+def consumable_items(request):
+    consumables = Item.objects.all()
+    
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        price = request.POST.get('price')
+        item_id = request.POST.get('item_id')
+        action = request.POST.get('action')  # either 'toggle' or 'edit'
+        
+        if item_id:
+            item = get_object_or_404(Item, id=item_id)
+
+            if action == 'toggle':
+                item.available = not item.available
+                item.save()
+                messages.success(request, 'Consumable item availability updated successfully')
+                return redirect('consumable_items')
+
+            elif action == 'edit':
+                item.title = title
+                item.price = price
+                item.save()
+                messages.success(request, 'Consumable item updated successfully')
+                return redirect('consumable_items')
+        else:
+            messages.error(request, 'Item ID not provided.')
+            return redirect('consumable_items')
+    
+    context = {'consumables': consumables}
+    return render(request, "consumables/consumable_items.html", context)
+
+# def consumable_requests_list(request):
+#     if request.method == 'POST':
+#         if 'remove_item_id' in request.POST:
+#             detail_id = request.POST.get('remove_item_id')
+#             detail = get_object_or_404(ConsumableRequestDetail, id=detail_id)
+#             if detail.request.status == 'Pending':
+#                 detail.delete()
+#                 messages.success(request, "Item removed successfully.")
+#             else:
+#                 messages.error(request, "Cannot remove item from an approved request.")
+#             return redirect('consumable_requests_list')
+
+#         elif 'reduce_quantity_id' in request.POST:
+#             detail_id = request.POST.get('reduce_quantity_id')
+#             new_quantity = request.POST.get('new_quantity')
+#             detail = get_object_or_404(ConsumableRequestDetail, id=detail_id)
+
+#             if detail.request.status != 'Pending':
+#                 messages.error(request, "Cannot reduce quantity on an approved request.")
+#             elif new_quantity.isdigit() and 0 < int(new_quantity) < detail.quantity:
+#                 detail.quantity = int(new_quantity)
+#                 detail.save()
+#                 messages.success(request, "Quantity reduced successfully.")
+#             elif int(new_quantity) == detail.quantity:
+#                 messages.info(request, "Quantity is unchanged.")
+#             else:
+#                 messages.error(request, "Invalid quantity. Must be lower than current value and greater than 0.")
+#             return redirect('consumable_requests_list')
+
+#     search_query = request.GET.get('q', '').strip()
+#     requests = ConsumableRequest.objects.all()
+
+#     if search_query:
+#         requests = requests.filter(
+#             Q(user__first_name__icontains=search_query) | 
+#             Q(user__last_name__icontains=search_query) | 
+#             Q(user__username__icontains=search_query) | 
+#             Q(status__iexact=search_query) | 
+#             Q(details__item__title__icontains=search_query)
+#         ).distinct()
+
+#     requests = requests.prefetch_related(
+#         Prefetch('details__item')
+#     ).order_by('-date_created')
+
+#     paginator = Paginator(requests, 10)
+#     page_number = request.GET.get('page')
+#     page_obj = paginator.get_page(page_number)
+
+#     context = {
+#         'page_obj': page_obj,
+#         'search_query': search_query
+#     }
+#     return render(request, 'consumables/request_list.html', context)
 
 
 def consumable_requests_list(request):
@@ -48,16 +176,21 @@ def consumable_requests_list(request):
             return redirect('consumable_requests_list')
 
     search_query = request.GET.get('q', '').strip()
-    requests = ConsumableRequest.objects.all()
 
+    # Show all if searching
     if search_query:
-        requests = requests.filter(
+        requests = ConsumableRequest.objects.filter(
             Q(user__first_name__icontains=search_query) | 
             Q(user__last_name__icontains=search_query) | 
             Q(user__username__icontains=search_query) | 
             Q(status__iexact=search_query) | 
             Q(details__item__title__icontains=search_query)
         ).distinct()
+    else:
+        # Only non-approved requests when not searching
+        # requests = ConsumableRequest.objects.exclude(status='Approved')
+        requests = ConsumableRequest.objects.exclude(status__in=['Approved', 'Paid'])
+
 
     requests = requests.prefetch_related(
         Prefetch('details__item')
@@ -69,10 +202,11 @@ def consumable_requests_list(request):
 
     context = {
         'page_obj': page_obj,
-        'search_query': search_query
+        'search_query': search_query,
+        'requests':requests
+
     }
     return render(request, 'consumables/request_list.html', context)
-
 
 
 
@@ -339,6 +473,92 @@ def add_single_consumable_payment(request):
         return redirect(request.path)
 
     return render(request, "consumables/add_single_payment.html")
+
+
+
+
+def consumable_requests_by_month(request):
+    details = ConsumableRequestDetail.objects.select_related('request', 'item', 'request__user')
+
+    grouped_by_month = defaultdict(list)
+    for detail in details:
+        month = detail.request.date_created.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        grouped_by_month[month].append(detail)
+
+    # Convert dict to list of tuples for template: [(month, [details]), ...]
+    grouped_list = sorted(grouped_by_month.items())
+
+    context = {
+        'grouped_list': grouped_list,
+    }
+    return render(request, 'consumables/monthly_summary.html', context)
+
+from datetime import datetime
+from collections import defaultdict
+from django.db.models import Sum, F
+from .models import ConsumableRequestDetail
+
+def consumable_details(request, month):
+    try:
+        month_date = datetime.strptime(month, "%Y-%m")
+    except ValueError:
+        return render(request, "consumables/grouped_details.html", {"error": "Invalid month format."})
+
+    # Filter common queryset for the month
+    monthly_qs = ConsumableRequestDetail.objects.filter(
+        date_created__year=month_date.year,
+        date_created__month=month_date.month
+    )
+
+    # Totals by status within the selected month
+    approved_total = monthly_qs.filter(
+        request__status='Approved'
+    ).aggregate(
+        total=Sum(F('quantity') * F('item_price'))
+    )['total'] or 0
+
+    pending_total = monthly_qs.filter(
+        request__status='Pending'
+    ).aggregate(
+        total=Sum(F('quantity') * F('item_price'))
+    )['total'] or 0
+
+    paid_total = monthly_qs.filter(
+        request__status='Paid'  # Capitalize 'Paid' to match model status
+    ).aggregate(
+        total=Sum(F('quantity') * F('item_price'))
+    )['total'] or 0
+
+    # Get all monthly details with related fields
+    details = monthly_qs.select_related('item', 'request__user')
+
+    # Group by user
+    user_data = defaultdict(list)
+    for detail in details:
+        user_data[detail.request.user].append(detail)
+
+    # Prepare grouped data
+    grouped_data = []
+    for user, items in user_data.items():
+        grouped_data.append({
+            "user": user,
+            "items": items,
+            "total": sum(d.total_price for d in items)
+        })
+
+    context = {
+        "month": month_date,
+        "grouped_data": grouped_data,
+        'approved_total': approved_total,
+        'pending_total': pending_total,
+        'paid_total': paid_total,
+    }
+    return render(request, "consumables/grouped_details.html", context)
+
+
+
+
+
 
 
 

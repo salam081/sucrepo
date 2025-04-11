@@ -36,6 +36,8 @@ import pandas as pd
 import os
 from django.conf import settings
 from django.utils.dateparse import parse_date
+from .forms import LoanSettingsForm
+
 
 
 def add_single_loan_payment(request):
@@ -507,6 +509,39 @@ def delete_reject_loan(request,id):
     rejectObj = LoanRequest.objects.get(id=id)
     rejectObj.delete()
     return redirect('all_reject_loan')
+
+@login_required
+def add_loan_type(request):
+    loan_types = LoanType.objects.all()
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        max_amount = request.POST.get('max_amount') or None
+        max_loan_term_months = request.POST.get('max_loan_term_months') or None
+
+        if name:
+            LoanType.objects.create(
+                name=name,
+                description=description,
+                max_amount=max_amount,
+                max_loan_term_months=max_loan_term_months,
+                created_by=request.user
+            )
+            messages.success(request, "Loan type created successfully.")
+            return redirect('loan_years_list') 
+        else:
+            messages.error(request, "Name is required.")
+    context = {'loan_types':loan_types}
+    return render(request, 'loan/add_loan_type.html',context)
+
+# @login_required
+# def delete_loan_type(request, id):
+#     loan_type = get_object_or_404(LoanType, id=id)
+#     if request.method == 'POST':
+#         loan_type.delete()
+#         messages.success(request, "Loan type deleted successfully.")
+#         return redirect('loan_years_list')  # change to your target view
+#     return render(request, 'loan/confirm_delete.html', {'loan_type': loan_type})
 
 
 def loan_years_list(request):

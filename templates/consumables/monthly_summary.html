@@ -1,0 +1,40 @@
+
+
+
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>All Consumable Requests Grouped by Month</h2>
+
+    <div class="row row-cols-1 row-cols-md-6 g-3">
+        {% for month, details in grouped_list %}
+        <div class="col">
+            <div class="card h-100 shadow bg-body-tertiary rounded">
+                <div class="card-header text-dark text-center">
+                    <a href="{% url 'consumable_details' month=month|date:'Y-m' %}" class="fs-6 text-decoration-none">
+                        {{ month|date:"F Y" }}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+<!-- <div class="container mt-4">
+    <h2>All Consumable Requests Grouped by Month</h2>
+{% for month, details in grouped_list %}
+<div class="card col-md-2 my-2  shadow  bg-body-tertiary rounded">
+    
+    <div class="card-header text-dark text-center">
+        <a href="{% url 'consumable_details' month=month|date:'Y-m' %}" class="fs-4">
+            {{ month|date:"F Y" }}
+        </a>
+    </div>
+</div>
+{% endfor %}
+
+</div> -->
+
