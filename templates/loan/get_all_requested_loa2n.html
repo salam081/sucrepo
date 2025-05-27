@@ -1,0 +1,110 @@
+{% extends 'base/base.html' %}
+{% load humanize %}
+
+
+{% block content %}
+<div class="d-flex justify-content-between  mb-3 ">
+    <!-- {% if messages %}
+    <div class="mt-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %} -->
+    <h4 class="card-title"></h4>
+
+    <b class="mb-4 mt-5 text-primary text-center">Requested Loan List</b>
+   
+    <form method="GET" action="{% url 'requested_loan' %}" class="mt-2 ">
+       
+        <div class="row mb-3">
+            <div class="col-md-6 mt-2">
+                <input type="text" name="search_term" class="form-control" placeholder="Enter Search">
+            </div>
+            <div class="col-md-6 mt-1">
+                <label></label>
+                <button type="submit" class="btn btn-outline-primary ">Search</button>
+            </div>
+        </div>   
+    </form>
+</div>
+    <div class="container ">
+       
+        {% if results %}
+        <div class="table-responsive">
+          <table class="table text-center align-middle table-bordered table-hover ">
+            <thead class="text-primary">
+                <tr>
+                    <!-- <th>Member Id</th> -->
+                    <th scope="col">Full Name</th>
+                    <th scope="col">IPPIS</th>
+                    <th scope="col">LoanType</th>
+                    <th scope="col">LoanAmount</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">LoanTerm</th> 
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            {% for loan in results %}
+                <tr>
+                    <td>{{ loan.member.member.first_name }} {{ loan.member.member.last_name }}</td>
+                    <td>{{ loan.member.ippis }}</td>
+                    <td>{{ loan.loan_type }}</td>
+                    <td class="loan-amount">₦{{ loan.amount }}</td>
+                    <td>{{ loan.status }}</td>
+                    <td>{{ loan.loan_term_months }}</td>
+                    <td>
+                        {% if loan.status == 'approved' %}
+                        <button class="btn btn-success" disabled>Approved</button>
+                        {% elif loan.status == 'rejected' %}
+                            <button class="btn btn-danger" disabled>Reject</button>
+                        {% elif loan.status == 'paid' %}
+                            <button class="btn btn-danger" disabled>Paid</button>
+                        {% else %}
+                        <a href="{% url 'approve_loan_request' loan.id %}" class="btn btn-success">Approve</a>
+                        <a href="{% url 'edit_requested_loan' loan.id %}" class="btn btn-info">Edit</a>
+                        <a href="{% url 'reject_loan_request' loan.id %}" class="btn btn-danger">Reject</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            
+        {% empty %}
+            <tr>
+                <td colspan="7" class="text-center text-muted">No savings found for this month.</td>
+            </tr>
+        {% endfor %}
+        
+        </table>
+    </div>
+    {% else%}
+    <p  class="text-center text-muted">No Loans found for this Search.</p>
+
+    {% endif%}
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const loanAmountCells = document.querySelectorAll('.loan-amount');
+            let total = 0;
+    
+            loanAmountCells.forEach(cell => {
+                const valueText = cell.textContent.replace(/[₦,]/g, '').trim(); // Remove ₦ and commas
+                const value = parseFloat(valueText);
+                if (!isNaN(value)) {
+                    total += value;
+                }
+            });
+    
+            // Format with commas and prepend ₦
+            const formatter = new Intl.NumberFormat('en-NG', {
+                style: 'currency',
+                currency: 'NGN',
+                minimumFractionDigits: 2
+            });
+    
+            document.getElementById('total-loan-amount').innerHTML = `<strong>${formatter.format(total)}</strong>`;
+        });
+    </script>
+    
+    {% endblock content %}

@@ -1,0 +1,72 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+
+
+            <!-- Recent Sales Start -->
+             <div class="container-fluid pt-4 px-4">
+                <div class="bg-light text-center rounded p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h6 class="mb-0">Recent Salse</h6>
+                        <a href="">Show All</a>
+                    </div>
+                    <form method="post" action="{% url 'deactivate_users' %}">
+                        {% csrf_token %}
+                        <div class="table-responsive">
+                            <table class="table text-start align-middle table-bordered table-hover mb-0">
+                                <thead>
+                                    <tr class="text-dark">
+                                        <th scope="col"><input class="form-check-input" type="checkbox" id="select-all"></th>
+                                        <th scope="col">S/N</th>
+                                        <th scope="col">FullName</th>
+                                        <th scope="col">UserName</th>
+                                        <th scope="col">Department</th>
+                                        <th scope="col">UserCode</th>
+                                        <th scope="col">Savings</th>
+                                        <th scope="col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for m in members %}
+                                    <tr>
+                                        <td><input class="form-check-input user-checkbox" type="checkbox" name="user_ids" value="{{ m.id }}"></td>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>{{ m.first_name }} {{ m.last_name }}</td>
+                                        <td>{{ m.username }}</td>
+                                        <td>{{ m.department }}</td>
+                                        <td>{{ m.member.ippis }}</td>
+                                        <td>{{ m.member.total_savings }}</td>
+                                        <td><a class="btn btn-sm btn-primary" href="{% url 'member_detail' m.id %}">Detail</a></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="submit" class="btn btn-danger mt-3">Deactivate Selected Users</button>
+                    </form>
+                    
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const selectAllCheckbox = document.getElementById('select-all');
+                            const userCheckboxes = document.querySelectorAll('.user-checkbox');
+                    
+                            selectAllCheckbox.addEventListener('change', function () {
+                                userCheckboxes.forEach(checkbox => {
+                                    checkbox.checked = this.checked;
+                                });
+                            });
+                    
+                            userCheckboxes.forEach(checkbox => {
+                                checkbox.addEventListener('change', function () {
+                                    selectAllCheckbox.checked = [...userCheckboxes].every(cb => cb.checked);
+                                });
+                            });
+                        });
+                    </script>
+                </div>
+            </div> 
+            <!-- Recent Sales End -->
+</div>
+
+
+{% endblock content %}

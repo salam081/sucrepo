@@ -1,0 +1,70 @@
+{% extends 'base/base.html' %}
+{% load humanize %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-body">
+            
+            {% if loanobj %}
+            <div class="table-responsive">
+                <h2 class="text-center">{{ loan_type.name }} -</h2>
+    
+                <a href="{% url 'loans_by_year' year=year loan_type_filter=loan_type.name %}?download=pdf"
+                    class="btn btn-outline-primary float-end mb-3">
+                    Download PDF
+                </a>
+                <table class="table  align-middle table-bordered table-hover">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Full Name</th>
+                            <!-- <th>Amount</th> -->
+                            <th>Approved Amount</th>
+                            <th>Status</th>
+                            <th>Bank</th>
+                            <th>BankCode</th>
+                            <th>Loan Type</th>
+                            <th> Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for loan in loanobj %}
+                        <tr>
+                            <td>{{ loan.member.member.first_name }}-{{ loan.member.member.last_name }}</td>
+                            <!-- <td>₦{{ loan.amount }}</td> -->
+                            <td>
+                                {% if loan.approved_amount %}
+                                ₦{{ loan.approved_amount }}
+                                {% else %}
+                                Pending
+                                {% endif %}
+                            </td>
+                            <td>{{ loan.status|title }}</td>
+                            <td>{{ loan.bank_name.name }}</td>
+                            <td>{{ loan.bank_code.name }}</td>
+                            <td>{{ loan.loan_type.name }}</td>
+                            <td>{{ loan.application_date }}</td>
+                        </tr>
+                        <hr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+
+
+                <ul>
+                    {% for status, total in totals_by_status.items %}
+                    <li>Status: {{ status|capfirst }} - Total Approved Amount: ₦{{ total }}</li>
+                    {% endfor %}
+                </ul>
+                
+
+
+                {% else %}
+                <p>No {{ loan_type.name|lower }} found for {{ year }}.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
