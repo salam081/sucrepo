@@ -11,5 +11,6 @@ urlpatterns = [
     path("address/<int:id>/", views.create_or_update_address, name="create_or_update_address"),
     path("next-of-kin/<int:id>/", views.create_or_update_next_of_kin, name="create_or_update_next_of_kin"),
     path("member/<int:id>/", views.member_detail, name="member_detail"),
+    path('reset_password/<int:id>/', views.resetPassword, name='reset_password'),
 
 ]

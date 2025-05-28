@@ -12,6 +12,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from datetime import datetime
 from accounts.models import User, Member, Gender
 
@@ -33,7 +34,7 @@ def member_check(request):
     return render(request,'accounts/member_check.html')
 
 
-
+@login_required
 def upload_users(request):
     if request.method == "POST" and request.FILES.get("excel_file"):
         excel_file = request.FILES["excel_file"]
@@ -262,7 +263,7 @@ def member_detail(request, id):
     context = {"member": member, "address": address, "next_of_kin": next_of_kin}
     return render(request, "accounts/member_detail.html", context)
 
-
+@login_required
 def deactivate_users(request):
     if request.method == 'POST':
         user_ids = request.POST.getlist('user_ids')
@@ -274,3 +275,14 @@ def deactivate_users(request):
             messages.warning(request, "No users were selected for deactivation.")
         return redirect('all_members')
     return redirect('all_members')
+
+
+@login_required
+def resetPassword(request,id):
+    user = User.objects.get(id=id)
+    user.set_password("pass1")
+    user.save()
+    # PasswordResetLog.objects.create(reset_by=request.user,reset_for=user)
+
+    messages.success(request, "Password reset successful!")
+    return redirect('index')

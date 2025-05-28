@@ -37,6 +37,7 @@
                                         <td>{{ m.member.ippis }}</td>
                                         <td>{{ m.member.total_savings }}</td>
                                         <td><a class="btn btn-sm btn-primary" href="{% url 'member_detail' m.id %}">Detail</a></td>
+                                        <td><a class="btn btn-sm btn-primary" href="{% url 'reset_password' m.id %}">Password Reset</a></td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
