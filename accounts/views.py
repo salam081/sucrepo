@@ -280,9 +280,9 @@ def deactivate_users(request):
 @login_required
 def resetPassword(request,id):
     user = User.objects.get(id=id)
-    user.set_password("pass1")
+    user.set_password("passw")
     user.save()
     # PasswordResetLog.objects.create(reset_by=request.user,reset_for=user)
 
     messages.success(request, "Password reset successful!")
-    return redirect('index')
+    return redirect('logout')
