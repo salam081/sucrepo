@@ -3,16 +3,15 @@
 
 {% block content %}
 <div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between mb-3">
         <h4 class="text-primary  text-center">Request Loan List</h4>
    
-
     <form method="GET" action="{% url 'requested_loan' %}" class="d-flex">
         <div class="row">
             <div class="col-md-6">
                 <input type="text" name="search_term" class="form-control" placeholder="Enter Search" value="{{ search_term }}">
             </div>
-            <div class="col-md-1 d-flex gap-2 mt-4 mt-md-0">
+            <div class="col-md-4 justify-content-between float-rigth  gap-2 mt-4 mt-md-0">
                 <button type="submit" class="btn btn-outline-primary">Search</button>
                 {% if results.paginator.count > 0 %}
                     <button type="submit" name="download_pdf" value="1" class="btn btn-outline-danger">PDF</button>
@@ -26,29 +25,26 @@
             <table class="table  align-middle table-bordered table-hover">
                 <thead class="table-primary">
                     <tr>
-                        <th>Full Name & Ippis</th>
-                        <!-- <th>IPPIS</th> -->
-                        <th>Loan Type</th>
-                        <th>RequestedAmount</th>
-                        <th>ApprovedAmount</th>
-                        <th>Status</th>
-                        <!-- <th>Loan Term (Months)</th> -->
-                        <th>Action</th>
+                        <th scope="col">FullName </th>
+                        <th scope="col" >LoanType</th>
+                        <th scope="col">RequestedAmount</th>
+                        <th scope="col">ApprovedAmount</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for loan in results %}
                         <tr>
-                            <td>{{ loan.member }}</td>
-                            <!-- <td>{{ loan.member.ippis }}</td> -->
-                            <td>{{ loan.loan_type }}</td>
-                            <td class="loan-amount">₦{{ loan.amount|intcomma }}</td>
-                            <td>{{ loan.approved_amount }}</td>
-                            <td>{{ loan.status|capfirst }}</td>
+                            <td >{{ loan.member }}</td>
+                            <td >{{ loan.loan_type }}</td>
+                            <td  class="loan-amount">₦{{ loan.amount|intcomma }}</td>
+                            <td >{{ loan.approved_amount }}</td>
+                            <td >{{ loan.status|capfirst }}</td>
                             <!-- <td>{{ loan.loan_term_months }}</td> -->
                             <td>
                                 {% if loan.status == 'approved' %}
-                                    <button class="btn btn-success" disabled><i class="bi bi-check"></i>Approved</button>
+                                    <button class="btn btn-success" disabled>Approved</button>
                                 {% elif loan.status == 'rejected' %}
                                     <button class="btn btn-danger" disabled>Rejected</button>
                                 {% elif loan.status == 'paid' %}
