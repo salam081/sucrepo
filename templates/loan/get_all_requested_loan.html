@@ -3,61 +3,67 @@
 
 {% block content %}
 <div class="container mt-5">
-    <div class="d-flex justify-content-between mb-3">
-        <h4 class="text-primary  text-center">Request Loan List</h4>
-   
-    <form method="GET" action="{% url 'requested_loan' %}" class="d-flex">
-        <div class="row">
-            <div class="col-md-6">
-                <input type="text" name="search_term" class="form-control" placeholder="Enter Search" value="{{ search_term }}">
+   <!-- Header and Search -->
+    <div class="mb-4">
+        <h4 class="text-primary text-center mb-3">Request Loan List</h4>
+        <form method="GET" action="{% url 'requested_loan' %}">
+            <div class="row g-2">
+                <div class="col-6 col-md-4">
+                    <input type="text" name="search_term" class="form-control" placeholder="Search Status"
+                        value="{{ search_term }}">
+                </div>
+                <div class="col-6 col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-outline-primary w-100 w-md-auto">Search</button>
+                    {% if results.paginator.count > 0 %}
+                    <button type="submit" name="download_pdf" value="1"
+                        class="btn btn-outline-danger w-100 w-md-auto">PDF</button>
+                    {% endif %}
+                </div>
             </div>
-            <div class="col-md-4 justify-content-between float-rigth  gap-2 mt-4 mt-md-0">
-                <button type="submit" class="btn btn-outline-primary">Search</button>
-                {% if results.paginator.count > 0 %}
-                    <button type="submit" name="download_pdf" value="1" class="btn btn-outline-danger">PDF</button>
-                {% endif %}
-            </div>
-        </div>
-    </form>
-</div>
+        </form>
+    </div>
     {% if results %}
         <div class="table-responsive">
-            <table class="table  align-middle table-bordered table-hover">
-                <thead class="table-primary">
-                    <tr>
-                        <th scope="col">FullName </th>
-                        <th scope="col" >LoanType</th>
-                        <th scope="col">RequestedAmount</th>
-                        <th scope="col">ApprovedAmount</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Action</th>
-                    </tr>
-                </thead>
+            <table class="table table-sm align-middle table-bordered table-hover">
+            <thead class="table-primary">
+                <tr>
+                    <th class="text-nowrap" style="min-width: 150px;">Full Name</th>
+                    <th class="text-nowrap" style="min-width: 120px;">Loan Type</th>
+                    <th class="text-nowrap" style="min-width: 140px;">Requested Amount</th>
+                    <th class="text-nowrap" style="min-width: 140px;">Approved Amount</th>
+                    <th class="text-nowrap" style="min-width: 100px;">Status</th>
+                    <th class="text-nowrap" style="min-width: 120px;">Action</th>
+                </tr>
+
+            </thead>
                 <tbody>
                     {% for loan in results %}
-                        <tr>
-                            <td >{{ loan.member }}</td>
-                            <td >{{ loan.loan_type }}</td>
-                            <td  class="loan-amount">₦{{ loan.amount|intcomma }}</td>
-                            <td >{{ loan.approved_amount }}</td>
-                            <td >{{ loan.status|capfirst }}</td>
-                            <!-- <td>{{ loan.loan_term_months }}</td> -->
-                            <td>
-                                {% if loan.status == 'approved' %}
-                                    <button class="btn btn-success" disabled>Approved</button>
-                                {% elif loan.status == 'rejected' %}
-                                    <button class="btn btn-danger" disabled>Rejected</button>
-                                {% elif loan.status == 'paid' %}
-                                    <button class="btn btn-secondary" disabled>Paid</button>
-                                {% else %}
-                                <div class="d-flex">
-                                    <a href="{% url 'approve_loan_request' loan.id %}" class="btn btn-success"><i class="bi bi-check"></i></a>
-                                    <a href="{% url 'edit_requested_loan' loan.id %}" class="btn btn-info"><i class="bi bi-pencil-fill"></i></a>
-                                    <a href="{% url 'reject_loan_request' loan.id %}" class="btn btn-danger"><i class="bi bi-backspace-reverse"></i></a>
-                                </div>
-                                    {% endif %}
-                            </td>
-                        </tr>
+                       <tr>
+                    <td class="text-nowrap text-truncate" style="max-width: 250px;">{{ loan.member }}</td>
+                    <td class="text-nowrap text-truncate" style="max-width: 250px;">{{ loan.loan_type }}</td>
+                    <td class="loan-amount text-nowrap">₦{{ loan.amount|intcomma }}</td>
+                    <td class="text-nowrap">₦{{ loan.approved_amount|intcomma }}</td>
+                    <td class="text-capitalize text-nowrap">{{ loan.status }}</td>
+                    <td>
+                        {% if loan.status == 'approved' %}
+                        <button class="btn btn-success btn-sm w-100" disabled>Approved</button>
+                        {% elif loan.status == 'rejected' %}
+                        <button class="btn btn-danger btn-sm w-100" disabled>Rejected</button>
+                        {% elif loan.status == 'paid' %}
+                        <button class="btn btn-secondary btn-sm w-100" disabled>Paid</button>
+                        {% else %}
+                        <div class="d-flex flex-wrap gap-1">
+                            <a href="{% url 'approve_loan_request' loan.id %}" class="btn btn-success btn-sm"><i
+                                    class="bi bi-check"></i></a>
+                            <a href="{% url 'edit_requested_loan' loan.id %}" class="btn btn-info btn-sm"><i
+                                    class="bi bi-pencil-fill"></i></a>
+                            <a href="{% url 'reject_loan_request' loan.id %}" class="btn btn-danger btn-sm"><i
+                                    class="bi bi-backspace-reverse"></i></a>
+                        </div>
+                        {% endif %}
+                    </td>
+                </tr>
+
                     {% empty %}
                         <tr>
                             <td colspan="7" class="text-center text-muted">No loans found.</td>

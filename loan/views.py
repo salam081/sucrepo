@@ -229,10 +229,12 @@ def get_all_requested_loan(request):
     search_term = request.GET.get('search_term', '').strip()
 
     base_queryset = LoanRequest.objects.exclude(status='rejected')
-
     if search_term:
         results_queryset = base_queryset.filter(
             Q(status__icontains=search_term) |
+            Q(member__member__first_name__icontains=search_term) |
+            Q(member__member__last_name__icontains=search_term) |
+            Q(member__member__username__icontains=search_term) |
             Q(id__icontains=search_term)
         )
     else:
@@ -295,7 +297,7 @@ def get_all_requested_loan(request):
     # Regular HTML context
     context = {
         'results': results,
-        'search_term': search_term,
+        'search_term': "",
         'totals_by_status': totals_by_status,
         'total_approved': total_amont_loan_request,
         'total_pending': total_pending,
