@@ -43,8 +43,17 @@
                             <input type="number" class="form-control" id="loan_term_months" name="loan_term_months"
                                 required placeholder="Enter term in months" min="1">
                         </div>
-
-                       <!-- Bank Name -->
+                          <div class="col-md-6 mb-3">
+                            <label for="file_one" class="form-label">Account Number <span
+                                    class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="file_one" name="account_number">
+                        </div>
+                      
+                    </div>
+                    <div class="row">
+                        
+                        
+                         <!-- Bank Name -->
                         <div class="col-md-6 mb-3">
                             <label for="bank_name" class="form-label">Select Your Payment Bank  <span
                                     class="text-danger">*</span></label>
@@ -55,14 +64,6 @@
                                 {% endfor %}
                             </select>
                         </div>
-                    </div>
-                    <div class="row">
-                         <div class="col-md-6 mb-3">
-                            <label for="file_one" class="form-label">Upload Supporting Document <span
-                                    class="text-danger">*</span></label>
-                            <input type="file" class="form-control" id="file_one" name="file_one">
-                        </div>
-                        
 
                         <!-- Bank Code (Auto-filled) -->
                         <div class="col-md-6 mb-3">
@@ -72,6 +73,11 @@
 
                         </div>
                     </div>
+                     <div class="col-md-12 mb-3">
+                            <label for="file_one" class="form-label">Upload Supporting Document <span
+                                    class="text-danger">*</span></label>
+                            <input type="file" class="form-control" id="file_one" name="file_one">
+                        </div>
                     <div class="row">
                         <!-- Guarantor Name -->
                         <div class="col-md-4 mb-3">

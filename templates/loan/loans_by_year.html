@@ -17,33 +17,37 @@
                 <table class="table  align-middle table-bordered table-hover">
                     <thead class="table-primary">
                         <tr>
-                            <th>Full Name</th>
+                            <th class="text-nowrap" style="min-width: 100px;">M/ID</th>
+                            <th class="text-nowrap" style="min-width: 150px;">Full Name</th>
                             <!-- <th>Amount</th> -->
-                            <th>Approved Amount</th>
-                            <th>Status</th>
-                            <th>Bank</th>
-                            <th>BankCode</th>
-                            <th>Loan Type</th>
-                            <th> Date</th>
+                            <th class="text-nowrap" style="min-width: 150px;">Approved Amount</th>
+                            <!-- <th class="text-nowrap" style="min-width: 150px;">Status</th> -->
+                            <th class="text-nowrap" style="min-width: 150px;">Account Number</th>
+                            <th class="text-nowrap" style="min-width: 150px;">Bank</th>
+                            <th class="text-nowrap" style="min-width: 150px;">BankCode</th>
+                            <!-- <th class="text-nowrap" style="min-width: 150px;">Loan Type</th> -->
+                            <th class="text-nowrap" style="min-width: 150px;"> Date</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for loan in loanobj %}
                         <tr>
-                            <td>{{ loan.member.member.first_name }}-{{ loan.member.member.last_name }}</td>
+                            <td>{{ loan.member.member.member_number }}</td>
+                            <td class="text-nowrap text-truncate" style="max-width: 250px;">{{ loan.member.member.first_name }}-{{ loan.member.member.last_name }}</td>
                             <!-- <td>₦{{ loan.amount }}</td> -->
-                            <td>
+                            <td class="text-nowrap text-truncate" style="max-width: 250px;">
                                 {% if loan.approved_amount %}
                                 ₦{{ loan.approved_amount }}
                                 {% else %}
                                 Pending
                                 {% endif %}
                             </td>
-                            <td>{{ loan.status|title }}</td>
-                            <td>{{ loan.bank_name.name }}</td>
+                            <!-- <td class="text-nowrap text-truncate" style="max-width: 250px;">{{ loan.status|title }}</td> -->
+                            <td class="text-nowrap text-truncate" style="max-width: 250px;">{{ loan.account_number }}</td>
+                            <td class="text-nowrap text-truncate" style="max-width: 250px;">{{ loan.bank_name.name }}</td>
                             <td>{{ loan.bank_code.name }}</td>
-                            <td>{{ loan.loan_type.name }}</td>
-                            <td>{{ loan.application_date }}</td>
+                            <!-- loan<td class="text-nowrap text-truncate" style="max-width: 250px;">{{ loan.loan_type.name }}</td> -->
+                            <td class="text-nowrap text-truncate" style="max-width: 250px;">{{ loan.application_date }}</td>
                         </tr>
                         <hr>
                         {% endfor %}

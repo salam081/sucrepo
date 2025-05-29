@@ -153,6 +153,7 @@ def loan_request_view(request):
 
         bank_name_id = request.POST.get('bank_name')
         bank_code_id = request.POST.get('bank_code')
+        account_number = request.POST.get('account_number')
 
         guarantor_name = request.POST.get('guarantor_name')
         guarantor_ippis = request.POST.get('guarantor_ippis')
@@ -178,7 +179,7 @@ def loan_request_view(request):
             member=member,loan_type_id=loan_type_id,
             amount=amount,loan_term_months=loan_term_months,
             approved_amount=None,file_one=file_one,
-            bank_name_id=bank_name_id,bank_code_id=bank_code_id,
+            bank_name_id=bank_name_id,bank_code_id=bank_code_id,account_number=account_number,
             guarantor_name=guarantor_name,guarantor_ippis=guarantor_ippis,
             guarantor_phone=guarantor_phone,created_by=request.user,
         )
