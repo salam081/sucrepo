@@ -283,6 +283,6 @@ def resetPassword(request,id):
     user.set_password("passw")
     user.save()
     # PasswordResetLog.objects.create(reset_by=request.user,reset_for=user)
-
     messages.success(request, "Password reset successful!")
-    return redirect('logout')
+    return redirect('all_members')
+

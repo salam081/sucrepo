@@ -8,16 +8,16 @@
         <h4 class="text-primary text-center mb-3">Request Loan List</h4>
         <form method="GET" action="{% url 'requested_loan' %}">
             <div class="row g-2">
-                <div class="col-6 col-md-4">
+                <div class="col-3 col-md-3">
                     <input type="text" name="search_term" class="form-control" placeholder="Search Status"
                         value="{{ search_term }}">
                 </div>
-                <div class="col-6 col-md-4 d-flex gap-2">
-                    <button type="submit" class="btn btn-outline-primary w-100 w-md-auto">Search</button>
-                    {% if results.paginator.count > 0 %}
+                <div class="col-2  d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100 w-md-auto">Search</button>
+                    <!-- {% if results.paginator.count > 0 %}
                     <button type="submit" name="download_pdf" value="1"
                         class="btn btn-outline-danger w-100 w-md-auto">PDF</button>
-                    {% endif %}
+                    {% endif %} -->
                 </div>
             </div>
         </form>
@@ -73,23 +73,12 @@
             </table>
         </div>
 
-        <!-- Totals by status -->
-        
-        <!-- {% if totals_by_status %}
-        <div class="mt-4">
-            <h5>Loan Totals by Status:</h5>
-            <ul>
-                {% for status, total in totals_by_status.items %}
-                    <li><strong>{{ status|capfirst }}:</strong> ₦{{ total|intcomma }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-        {% endif %} -->
+    
          <div class="card shadow d-flex col-md-4 card-text">
         <ul class="list-group list-group-flush">
-            <li class="list-group-item mt-3 bg-primary text-white">Total Approved Amount: ₦{{ total_approved_amount|floatformat:2 }}</li>
+            <!-- <li class="list-group-item mt-3 bg-primary text-white">Total Approved Amount: ₦{{ total_approved_amount|floatformat:2 }}</li> -->
             <li class="list-group-item mt-3 bg-success text-white">Total Pending: Amount  ₦{{ total_pending|floatformat:2 }}</li>
-            <li class="list-group-item mt-3 bg-info text-white">Total Paid Amount ₦{{ total_repaid|floatformat:2 }}</li>
+            <!-- <li class="list-group-item mt-3 bg-info text-white">Total Paid Amount ₦{{ total_repaid|floatformat:2 }}</li> -->
             <!-- <li class="list-group-item text-danger">Total Of All Loan Request: ₦{{ total_approved|floatformat:2 }}</li> -->
         </ul>
         </div>
