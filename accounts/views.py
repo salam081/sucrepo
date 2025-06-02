@@ -278,11 +278,40 @@ def deactivate_users(request):
 
 
 @login_required
+def activate_users(request):
+    if request.method == 'POST':
+        user_ids = request.POST.getlist('user_ids')
+
+        # If form was submitted via JavaScript into one input (comma-separated)
+        if len(user_ids) == 1 and ',' in user_ids[0]:
+            user_ids = user_ids[0].split(',')
+
+        # Filter out empty strings and convert to integers
+        user_ids = [int(uid) for uid in user_ids if uid.strip().isdigit()]
+
+        if user_ids:
+            users_to_activate = User.objects.filter(id__in=user_ids)
+            updated_count = users_to_activate.update(is_active=True)
+            messages.success(request, f"{updated_count} user(s) have been activated.")
+        else:
+            messages.warning(request, "No valid users were selected for activation.")
+
+        return redirect('all_members')
+
+    return redirect('all_members')
+
+
+
+
+
+
+@login_required
 def resetPassword(request,id):
     user = User.objects.get(id=id)
-    user.set_password("passw")
+    user.set_password("pass")
     user.save()
     # PasswordResetLog.objects.create(reset_by=request.user,reset_for=user)
+
     messages.success(request, "Password reset successful!")
     return redirect('all_members')
 

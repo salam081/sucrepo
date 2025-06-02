@@ -22,8 +22,8 @@
             <div class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-user me-2"></i>Members</a>
                 <div class="dropdown-menu bg-transparent border-0">
-                    <a href="{% url 'upload_users' %}" class="dropdown-item">Upload Members</a>
-                    <a href=" {% url 'all_members' %}" class="dropdown-item">View members  </a>
+                    <a href="{% url 'upload_users' %}" class="dropdown-item mb-2">Upload Members</a>
+                    <a href=" {% url 'all_members' %}" class="dropdown-item mb-2">View members  </a>
                     <!-- <a href=" {% url 'interest_form' %}" class="dropdown-item">Take Interest </a> -->
                     <!-- <a href=" {% url 'distribute_savings' %}" class="dropdown-item">Distribute Savings </a> -->
                     <!-- <a href="{% url 'summary' %}" class="dropdown-item">summary page</a> -->
@@ -32,28 +32,29 @@
                     <a href="element.html" class="dropdown-item">Other Elements</a>
                 </div>
             </div>
-            <div class="nav-item dropdown">
+                    <div class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-laptop me-2"></i>Savings</a>
                 <div class="dropdown-menu bg-transparent border-0">
-                    <a href="{% url 'all_member_saving_search' %}" class="dropdown-item">Members Saving</a>
-                    <a href="{% url 'upload_savings' %}" class="dropdown-item">Upload Monthly Saving</a>
-                    <a href=" {% url 'get_upload_savings' %}" class="dropdown-item">Uploaded  Saving </a>
-                    <a href=" {% url 'interest_form' %}" class="dropdown-item">Take Admin Fee </a>
-                    <a href="{% url 'get_upload_interest' %}" class="dropdown-item"> View Admin Fee</a>
-                    <a href=" {% url 'distribute_savings' %}" class="dropdown-item">Distribute Savings to loan/inves </a>
-                    <a href="{% url 'loanable_investment_months' %}" class="dropdown-item">loanable investment months</a>
-                    <a href="{% url 'summary' %}" class="dropdown-item">summary page</a>
+                    <a href="{% url 'all_member_saving_search' %}" class="dropdown-item mb-2">Members Saving</a>
+                    <a href="{% url 'upload_savings' %}" class="dropdown-item mb-2">Upload Monthly Saving</a>
+                    <a href="{% url 'get_upload_savings' %}" class="dropdown-item mb-2">View Upload Saving</a>
+                    <a href="{% url 'interest_form' %}" class="dropdown-item mb-2">Take Admin Fee</a>
+                    <a href="{% url 'get_upload_interest' %}" class="dropdown-item mb-2">View Admin Fee</a>
+                    <a href="{% url 'distribute_savings' %}" class="dropdown-item mb-2">Distribute Savings to Loan/Invest</a>
+                    <a href="{% url 'loanable_investment_months' %}" class="dropdown-item mb-2">Loanable Investment Months</a>
+                    <a href="{% url 'summary' %}" class="dropdown-item mb-2">Summary Page</a>
                     <a href="element.html" class="dropdown-item">Other Elements</a>
                 </div>
             </div>
+
             <div class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-table me-2"></i>Loan</a>
                 <div class="dropdown-menu bg-transparent border-0">
-                    <a href="{% url 'requested_loan' %}" class="dropdown-item"> Approve Loan Request</a>
-                    <a href="{% url 'loan_years_list' %}" class="dropdown-item">  Loan Request List </a>
-                    <a href="{% url 'all_reject_loan' %}" class="dropdown-item">  All Reject loan</a>
-                    <a href="{% url 'upload_loan_repayback' %}" class="dropdown-item">Upload Loan Payment</a>
-                    <a href="{% url 'add_single_loan_payment' %}" class="dropdown-item">Add Single Loan Payment</a>
+                    <a href="{% url 'requested_loan' %}" class="dropdown-item mb-2"> Approve Loan Request</a>
+                    <a href="{% url 'loan_years_list' %}" class="dropdown-item mb-2">  Loan Request List </a>
+                    <a href="{% url 'all_reject_loan' %}" class="dropdown-item mb-2">  All Reject loan</a>
+                    <a href="{% url 'upload_loan_repayback' %}" class="dropdown-item mb-2">Upload Loan Payment</a>
+                    <a href="{% url 'add_single_loan_payment' %}" class="dropdown-item mb-2">Add Single Loan Payment</a>
                      
                 </div>
             </div>
@@ -61,9 +62,9 @@
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-table me-2"></i>Consumable</a>
                 <div class="dropdown-menu bg-transparent border-0">
                     <!-- <a href="{% url 'upload_users' %}" class="dropdown-item">Consumable Request</a> -->
-                    <a href="{% url 'consumable_requests_list' %}" class="dropdown-item">Consumable Request</a>
-                    <a href="{% url 'upload_consumable_payment' %}" class="dropdown-item">Upload Consumable Payments</a>
-                    <a href="{% url 'add_single_consumable_payment' %}" class="dropdown-item">Add single Payments</a>
+                    <a href="{% url 'consumable_requests_list' %}" class="dropdown-item mb-2">Consumable Request</a>
+                    <a href="{% url 'upload_consumable_payment' %}" class="dropdown-item mb-2">Upload Consumable Payments</a>
+                    <a href="{% url 'add_single_consumable_payment' %}" class="dropdown-item mb-2">Add single Payments</a>
 
                      
                 </div>

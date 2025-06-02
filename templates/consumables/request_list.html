@@ -18,6 +18,7 @@
                 <th>Items</th>
                 <th>TotalPrice</th>
                 <th>Status</th>
+                <th>Amount Paid</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -78,12 +79,11 @@
                         {% elif request.status == 'Declined' %} bg-danger
                         {% elif request.status == 'Paid' %} bg-primary
                         {% else %} bg-warning text-dark
-                        {% endif %}
-                    ">
+                        {% endif %}">
                         {{ request.status }}
                     </span>
                 </td>
-                
+                <td class="text-success"><b>{{request.total_paid}}</b></td>
                 <td>
                     {% if request.status == 'Pending' %}
                     <a href="{% url 'approve_consumable_request' request.id %}" class="btn btn-success btn-sm">Approve</a>

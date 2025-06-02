@@ -235,12 +235,21 @@ def interest_form_view(request):
     # messages.success(request, f" deducted successfully")
     return render(request, 'main/deduct_interest_form.html')
 
-def deduct_monthly_interest(request, year, month):
+
+def deduct_monthly_interest(request):
     if request.method == 'POST':
         deduction_amount_str = request.POST.get('deduction_amount')
-        if not deduction_amount_str:
-            messages.error(request, "Please enter the amount to deduct.")
-            return redirect('interest_form')  
+        month_str = request.POST.get('month')  # Format: 'YYYY-MM'
+
+        if not deduction_amount_str or not month_str:
+            messages.error(request, "Please enter both the month and deduction amount.")
+            return redirect('interest_form')
+
+        try:
+            year, month = map(int, month_str.split('-'))
+        except ValueError:
+            messages.error(request, "Invalid month format.")
+            return redirect('interest_form')
 
         try:
             deduction_amount = Decimal(deduction_amount_str)
@@ -248,42 +257,84 @@ def deduct_monthly_interest(request, year, month):
                 messages.error(request, "Deduction amount must be greater than zero.")
                 return redirect('interest_form')
         except DecimalException:
-            messages.error(request, "Invalid deduction amount. Please enter a valid number.")
+            messages.error(request, "Invalid deduction amount.")
             return redirect('interest_form')
 
-        # Filter all savings made in the specified month
         savings_this_month = Savings.objects.filter(month__year=year, month__month=month)
-        # Count how many deductions were applied
-        count = 0  
+        count = 0
 
         for saving in savings_this_month:
             member = saving.member
-
-            # Check if interest already deducted for this member and month
             already_deducted = Interest.objects.filter(member=member, month=saving.month).exists()
 
             if not already_deducted and saving.month_saving >= deduction_amount:
-                # Preserve the original amount if not already saved
                 if saving.original_amount is None:
                     saving.original_amount = saving.month_saving
 
-                # Deduct the specified amount
                 saving.month_saving -= deduction_amount
                 saving.save()
 
-                # Record the deduction
-                Interest.objects.create(member=member, month=saving.month,amount_deducted=deduction_amount)
-
+                Interest.objects.create(member=member, month=saving.month, amount_deducted=deduction_amount)
                 count += 1
 
         if count:
-            messages.success(request, f"₦{deduction_amount} deducted from {count} members for {saving.month.strftime('%B %Y')}.")
-            return redirect('interest_form')
+            messages.success(request, f"₦{deduction_amount} deducted from {count} members for {calendar.month_name[month]} {year}.")
+            return redirect('get_upload_interest')
         else:
-            messages.info(request, f"No deductions made for {month}/{year}. Already deducted or amount below ₦{deduction_amount}.")
-        return redirect('interest_form')  
-    else:
-        return redirect('interest_form')
+            messages.info(request, f"No deductions made for {calendar.month_name[month]} {year}. Either already deducted .")
+            return redirect('interest_form')
+
+    return redirect('interest_form')
+
+# def deduct_monthly_interest(request, year, month):
+#     if request.method == 'POST':
+#         deduction_amount_str = request.POST.get('deduction_amount')
+#         if not deduction_amount_str:
+#             messages.error(request, "Please enter the amount to deduct.")
+#             return redirect('interest_form')  
+
+#         try:
+#             deduction_amount = Decimal(deduction_amount_str)
+#             if deduction_amount <= Decimal("0.00"):
+#                 messages.error(request, "Deduction amount must be greater than zero.")
+#                 return redirect('interest_form')
+#         except DecimalException:
+#             messages.error(request, "Invalid deduction amount. Please enter a valid number.")
+#             return redirect('interest_form')
+
+#         # Filter all savings made in the specified month
+#         savings_this_month = Savings.objects.filter(month__year=year, month__month=month)
+#         # Count how many deductions were applied
+#         count = 0  
+
+#         for saving in savings_this_month:
+#             member = saving.member
+
+#             # Check if interest already deducted for this member and month
+#             already_deducted = Interest.objects.filter(member=member, month=saving.month).exists()
+
+#             if not already_deducted and saving.month_saving >= deduction_amount:
+#                 # Preserve the original amount if not already saved
+#                 if saving.original_amount is None:
+#                     saving.original_amount = saving.month_saving
+
+#                 # Deduct the specified amount
+#                 saving.month_saving -= deduction_amount
+#                 saving.save()
+
+#                 # Record the deduction
+#                 Interest.objects.create(member=member, month=saving.month,amount_deducted=deduction_amount)
+
+#                 count += 1
+
+#         if count:
+#             messages.success(request, f"₦{deduction_amount} deducted from {count} members for {saving.month.strftime('%B %Y')}.")
+#             return redirect('get_upload_interest')
+#         else:
+#             messages.info(request, f"No deductions made for {month}/{year}. Already deducted or amount below ₦{deduction_amount}.")
+#         return redirect('interest_form')  
+#     else:
+#         return redirect('interest_form')
 
 
 #========== distribute saving ===================
@@ -292,6 +343,11 @@ def distribute_savings(year, month, distribution_ratios=None):
     if distribution_ratios is None:
         distribution_ratios = {"loanable": Decimal("0.50"), "investment": Decimal("0.50")}
 
+    # Check if Loanable or Investment records already exist for that month
+    if Loanable.objects.filter(month__year=year, month__month=month).exists() or \
+       Investment.objects.filter(month__year=year, month__month=month).exists():
+        return "exists"  # Return flag
+    
     savings_this_month = Savings.objects.filter(month__year=year, month__month=month)
     distributed_count = 0
 
@@ -301,22 +357,18 @@ def distribute_savings(year, month, distribution_ratios=None):
         loanable_amount = total * distribution_ratios.get("loanable", Decimal("0.00"))
         investment_amount = total * distribution_ratios.get("investment", Decimal("0.00"))
 
-        # Save to Loanable
-        # Loanable.objects.create(member=saving.member, month=saving.month, amount=loanable_amount)
         Loanable.objects.create(
-                member=saving.member,
-                month=saving.month,
-                amount=loanable_amount,
-                total_amount=total
-            )
-        # Save to Investment
-        # Investment.objects.create(member=saving.member, month=saving.month, amount=investment_amount)
+            member=saving.member,
+            month=saving.month,
+            amount=loanable_amount,
+            total_amount=total
+        )
         Investment.objects.create(
-                member=saving.member,
-                month=saving.month,
-                amount=investment_amount,
-                total_amount=total  # or investment_amount depending on your logic
-            )
+            member=saving.member,
+            month=saving.month,
+            amount=investment_amount,
+            total_amount=total
+        )
 
         distributed_count += 1
 
@@ -325,7 +377,7 @@ def distribute_savings(year, month, distribution_ratios=None):
 
 def distribute_savings_form(request):
     if request.method == "POST":
-        month_str = request.POST.get("month")  
+        month_str = request.POST.get("month")
 
         if not month_str:
             messages.error(request, "Please select a month.")
@@ -338,11 +390,21 @@ def distribute_savings_form(request):
             return render(request, "main/distribute_savings_form.html")
 
         distribution_ratios = {"loanable": Decimal("0.50"), "investment": Decimal("0.50")}
-        distributed_count = distribute_savings(year, month, distribution_ratios)
+        result = distribute_savings(year, month, distribution_ratios)
 
-        messages.success(request, f"Savings for {calendar.month_name[month]} {year} distributed equally to {distributed_count} members.")
-        return redirect("distribute_savings") 
+        if result == "exists":
+            messages.warning(request, f"Savings distribution for {calendar.month_name[month]} {year} already exists.")
+        elif result == "no_savings":
+            messages.warning(request, f"No savings found for {calendar.month_name[month]} {year}.")
+        else:
+            messages.success(request, f"Savings for {calendar.month_name[month]} {year} distributed to {result} member(s).")
+
+        return redirect("loanable_investment_months")
+
     return render(request, "main/distribute_savings_form.html")
+
+
+
 
 
 def distribute_savings_view(request, year, month):

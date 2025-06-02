@@ -102,7 +102,7 @@ def admin_edit_consumable_request(request, request_id):
                     detail.save()
 
             messages.success(request, "Loan term updated successfully.")
-            return redirect('admin_pending_requests')
+            return redirect('consumable_requests_list')
 
         except Exception as e:
             # messages.error(request, f"An error occurred: {e}")
