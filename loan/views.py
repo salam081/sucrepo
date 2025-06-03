@@ -525,16 +525,99 @@ def loan_years_list(request):
 
 
 
+# def loans_by_year(request, year, loan_type_filter):
+#     loan_type = get_object_or_404(LoanType, name__iexact=loan_type_filter)
+    
+#     # Get status from query string (if any)
+#     status_filter = request.GET.get('status')
+    
+#     # Base filter
+#     loanobj = LoanRequest.objects.filter(loan_type=loan_type, date_created__year=year)
+    
+#     # Apply status filter if provided
+#     if status_filter:
+#         loanobj = loanobj.filter(status__iexact=status_filter)
+
+#     # Totals by status
+#     totals_by_status = dict(
+#         loanobj.values('status')
+#         .annotate(total=Sum('approved_amount'))
+#         .values_list('status', 'total')
+#     )
+
+#     context = {
+#         'year': year,
+#         'loan_type': loan_type,
+#         'loanobj': loanobj,
+#         'totals_by_status': totals_by_status,
+#         'selected_status': "",
+#         # 'selected_status': status_filter,
+#     }
+
+#     # PDF download
+#     if request.GET.get('download') == 'pdf':
+#         template_path = 'loan/loans_by_year_pdf.html'
+#         response = HttpResponse(content_type='application/pdf')
+#         response['Content-Disposition'] = f'attachment; filename="loans_{loan_type.name}_{year}.pdf"'
+
+#         template = get_template(template_path)
+#         html = template.render(context)
+#         pisa_status = pisa.CreatePDF(html, dest=response)
+
+#         if pisa_status.err:
+#             return HttpResponse('We had some errors <pre>' + html + '</pre>')
+#         return response
+
+#     # Excel download
+#     if request.GET.get('download') == 'excel':
+#         wb = openpyxl.Workbook()
+#         ws = wb.active
+#         ws.title = "Loan Data"
+
+#         headers = ['ID', 'Applicant', 'Amount', 'Approved Amount', 'account_number', 'bank_name', 'bank_code', 'Status', 'Date Created']
+#         ws.append(headers)
+
+#         for loan in loanobj:
+#             ws.append([
+#                 loan.id,
+#                 str(loan.member),
+#                 loan.amount,
+#                 loan.approved_amount,
+#                 loan.account_number,
+#                 str(loan.bank_name),
+#                 str(loan.bank_code),
+#                 loan.status,
+#                 loan.date_created.strftime('%Y-%m-%d')
+#             ])
+
+#         for col in ws.columns:
+#             max_length = 0
+#             col_letter = get_column_letter(col[0].column)
+#             for cell in col:
+#                 if cell.value:
+#                     max_length = max(max_length, len(str(cell.value)))
+#             ws.column_dimensions[col_letter].width = max_length + 2
+
+#         response = HttpResponse(
+#             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+#         )
+#         response['Content-Disposition'] = f'attachment; filename="loans_{loan_type.name}_{year}.xlsx"'
+
+#         wb.save(response)
+#         return response
+
+#     return render(request, "loan/loans_by_year.html", context)
+
+
+
 def loans_by_year(request, year, loan_type_filter):
     loan_type = get_object_or_404(LoanType, name__iexact=loan_type_filter)
-    
-    # Get status from query string (if any)
     status_filter = request.GET.get('status')
-    
-    # Base filter
+
+    # Filter loans by type and year
     loanobj = LoanRequest.objects.filter(loan_type=loan_type, date_created__year=year)
-    
-    # Apply status filter if provided
+
+    # Optional: Filter by status if given
     if status_filter:
         loanobj = loanobj.filter(status__iexact=status_filter)
 
@@ -550,31 +633,28 @@ def loans_by_year(request, year, loan_type_filter):
         'loan_type': loan_type,
         'loanobj': loanobj,
         'totals_by_status': totals_by_status,
-        'selected_status': "",
-        # 'selected_status': status_filter,
+        'selected_status': status_filter,  # 👈 use this in template for filters
     }
 
-    # PDF download
+    # Handle PDF download
     if request.GET.get('download') == 'pdf':
         template_path = 'loan/loans_by_year_pdf.html'
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="loans_{loan_type.name}_{year}.pdf"'
-
         template = get_template(template_path)
         html = template.render(context)
         pisa_status = pisa.CreatePDF(html, dest=response)
-
         if pisa_status.err:
             return HttpResponse('We had some errors <pre>' + html + '</pre>')
         return response
 
-    # Excel download
+    # Handle Excel download
     if request.GET.get('download') == 'excel':
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "Loan Data"
 
-        headers = ['ID', 'Applicant', 'Amount', 'Approved Amount', 'account_number', 'bank_name', 'bank_code', 'Status', 'Date Created']
+        headers = ['ID', 'Applicant', 'Amount', 'Approved Amount', 'Account Number', 'Bank Name', 'Bank Code', 'Status', 'Date Created']
         ws.append(headers)
 
         for loan in loanobj:
@@ -602,84 +682,8 @@ def loans_by_year(request, year, loan_type_filter):
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
         response['Content-Disposition'] = f'attachment; filename="loans_{loan_type.name}_{year}.xlsx"'
-
         wb.save(response)
         return response
 
+    # Render normal HTML page
     return render(request, "loan/loans_by_year.html", context)
-
-
-
-# def loans_by_year(request, year, loan_type_filter):
-#     loan_type = get_object_or_404(LoanType, name__iexact=loan_type_filter)
-    
-#     # Filter by year, loan_type, and status
-#     loanobj = LoanRequest.objects.filter(loan_type=loan_type, date_created__year=year,) # status='approved'
-
-#     # Totals by status
-#     totals_by_status = dict(loanobj.values('status') .annotate(total=Sum('approved_amount')) .values_list('status', 'total'))
-
-#     context = {
-#         'year': year,'loan_type': loan_type,'loanobj': loanobj,
-#         'totals_by_status': totals_by_status
-#     }
-
-#     # Check if PDF is requested
-#     if request.GET.get('download') == 'pdf':
-#         template_path = 'loan/loans_by_year_pdf.html'  # separate template for PDF
-#         response = HttpResponse(content_type='application/pdf')
-#         response['Content-Disposition'] = f'attachment; filename="loans_{loan_type.name}_{year}.pdf"'
-
-#         template = get_template(template_path)
-#         html = template.render(context)
-
-#         pisa_status = pisa.CreatePDF(html, dest=response)
-
-#         if pisa_status.err:
-#             return HttpResponse('We had some errors <pre>' + html + '</pre>')
-#         return response
-    
-#     # Check if Excel is requested
-#     if request.GET.get('download') == 'excel':
-#         # Create Excel workbook
-#         wb = openpyxl.Workbook()
-#         ws = wb.active
-#         ws.title = "Loan Data"
-
-#         # Headers
-#         headers = ['ID', 'Applicant', 'Amount', 'Approved Amount','account_number', 'bank_name','bank_code', 'Status', 'Date Created']
-#         ws.append(headers)
-
-#         for loan in loanobj:
-#             ws.append([
-#                 loan.id,
-#                 str(loan.member),  # assuming ForeignKey to User
-#                 loan.amount,
-#                 loan.approved_amount,
-#                 loan.account_number,
-#                 str(loan.bank_name),
-#                 str(loan.bank_code),
-#                 loan.status,
-#                 loan.date_created.strftime('%Y-%m-%d')
-#             ])
-
-#         # Optional: Auto-adjust column widths
-#         for col in ws.columns:
-#             max_length = 0
-#             col_letter = get_column_letter(col[0].column)
-#             for cell in col:
-#                 if cell.value:
-#                     max_length = max(max_length, len(str(cell.value)))
-#             ws.column_dimensions[col_letter].width = max_length + 2
-
-#         # Create response
-#         response = HttpResponse(
-#             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-#         )
-#         response['Content-Disposition'] = f'attachment; filename="loans_{loan_type.name}_{year}.xlsx"'
-
-#         wb.save(response)
-#         return response
-
-#     # Default HTML render
-#     return render(request, "loan/loans_by_year.html", context)
