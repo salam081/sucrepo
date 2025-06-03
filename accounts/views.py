@@ -301,7 +301,25 @@ def activate_users(request):
     return redirect('all_members')
 
 
+def changePassword(request):
+    if request.method == 'POST':
+        old_password = request.POST.get('old_password')
+        new_password1 = request.POST.get('new_password1')
+        new_password2 = request.POST.get('new_password2')
 
+        if not request.user.check_password(old_password):
+            messages.error(request, 'Old password is incorrect')
+            return redirect('change_password')
+        elif new_password1 != new_password2:
+            messages.error(request, 'New passwords do not match')
+            return redirect('change_password')
+        else:
+            request.user.set_password(new_password1)
+            request.user.save()
+            messages.success(request, 'Password successfully changed login ')
+            return redirect('login')
+
+    return render(request, 'accounts/change_password.html')
 
 
 

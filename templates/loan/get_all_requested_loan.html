@@ -29,6 +29,7 @@
                 <tr>
                     <th class="text-nowrap" style="min-width: 150px;">Full Name</th>
                     <th class="text-nowrap" style="min-width: 120px;">Loan Type</th>
+                    <th class="text-nowrap" style="min-width: 120px;">Loan Term</th>
                     <th class="text-nowrap" style="min-width: 140px;">Requested Amount</th>
                     <th class="text-nowrap" style="min-width: 140px;">Approved Amount</th>
                     <th class="text-nowrap" style="min-width: 100px;">Status</th>
@@ -41,6 +42,7 @@
                        <tr>
                     <td class="text-nowrap text-truncate" style="max-width: 250px;">{{ loan.member }}</td>
                     <td class="text-nowrap text-truncate" style="max-width: 250px;">{{ loan.loan_type }}</td>
+                    <td class="text-nowrap text-center text-truncate" style="max-width: 250px;">{{ loan.loan_term_months }} Months</td>
                     <td class="loan-amount text-nowrap">₦{{ loan.amount|intcomma }}</td>
                     <td class="text-nowrap">₦{{ loan.approved_amount|intcomma }}</td>
                     <td class="text-capitalize text-nowrap">{{ loan.status }}</td>
