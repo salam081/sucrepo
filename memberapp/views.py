@@ -21,9 +21,10 @@ from .models import *
 from django.http import JsonResponse
 from datetime import date
 
-from datetime import date
+
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
+
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
@@ -245,7 +246,10 @@ def loan_request_view(request):
         })
 
      # Get current month in 3-letter format (e.g., "May")
-    current_month = datetime.datetime.now().strftime('%b')
+    # current_month = datetime.datetime.now().strftime('%b')
+    
+
+    current_month = datetime.now().strftime('%b')
 
     member = getattr(request.user, 'member', None)
     if not member:
