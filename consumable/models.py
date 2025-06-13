@@ -51,6 +51,8 @@ class ConsumableRequestDetail(models.Model):
     def total_price(self):
         return self.quantity * self.item_price
     
+    
+    
     def __str__(self):
         return f"{self.quantity} x {self.item.title} (Req #{self.request.id})"
     

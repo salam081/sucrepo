@@ -21,11 +21,15 @@ from .models import *
 from django.http import JsonResponse
 from datetime import date
 
-@login_required
-def disabled_requests_page(request):
-    return render(request, 'member/disabled_requests.html', {
-        'message': "Loan or consumable requests are currently Not Available. Please check back later."
-    })
+from datetime import date
+from dateutil.relativedelta import relativedelta
+from datetime import datetime
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect, render
+from django.db.models import Sum
+
+# from .models import Member, Savings, Loanable, Investment, LoanRequest, LoanRepayback, ConsumableRequest, LoanType
 
 @login_required
 def member_dashboard(request):
@@ -38,7 +42,6 @@ def member_dashboard(request):
         total=Sum('amount')
     )['total'] or 0
 
-
     investment_total = Investment.objects.filter(member=member).aggregate(
         total=Sum('amount')
     )['total'] or 0
@@ -47,21 +50,33 @@ def member_dashboard(request):
     current_month = today.month
     current_year = today.year
 
-    # Get the date for the first day of the previous month
     first_day_of_current_month = date(current_year, current_month, 1)
     previous_month_date = first_day_of_current_month - relativedelta(months=4)
     previous_month = previous_month_date.month
     previous_year = previous_month_date.year
 
-    monthly_saving = Savings.objects.filter( member=member,month__month=current_month,month__year=current_year).first()
+    monthly_saving = Savings.objects.filter(
+        member=member, 
+        month__month=current_month, 
+        month__year=current_year
+    ).first()
 
     previous_monthly_saving = Savings.objects.filter(
-        member=member,month__month=previous_month, month__year=previous_year).first()
+        member=member, 
+        month__month=previous_month, 
+        month__year=previous_year
+    ).first()
 
     # Prefer approved loan, fallback to rejected if none
-    active_loan = LoanRequest.objects.filter(member=member, status='approved').order_by('-approval_date').first()
+    active_loan = LoanRequest.objects.filter(
+        member=member, 
+        status='approved'
+    ).order_by('-approval_date').first()
     if not active_loan:
-        active_loan = LoanRequest.objects.filter(member=member, status='rejected').order_by('-approval_date').first()
+        active_loan = LoanRequest.objects.filter(
+            member=member, 
+            status='rejected'
+        ).order_by('-approval_date').first()
 
     loan_paid = loan_balance = monthly_payment = 0
     if active_loan and active_loan.status == 'approved':
@@ -75,15 +90,32 @@ def member_dashboard(request):
         .prefetch_related('details__item') \
         .order_by('-date_created')[:5]
 
-    active_consumable = ConsumableRequest.objects.filter(user=request.user, status='Approved').order_by('-date_created').first()
+    approved_consumable = ConsumableRequest.objects.filter(user=request.user, status='Approved') \
+        .order_by('-date_created')
 
-    consumable_approved_amount = consumable_total_paid = consumable_monthly_payment = consumable_balance_remaining = 0
-    if active_consumable:
-        consumable_approved_amount = active_consumable.calculate_total_price()
-        loan_term_months = active_consumable.details.first().loan_term_months if active_consumable.details.exists() else 1
-        consumable_monthly_payment = consumable_approved_amount / loan_term_months
-        consumable_total_paid = active_consumable.total_paid()
-        consumable_balance_remaining = consumable_approved_amount - consumable_total_paid
+    total_remaining = 0
+    consumable_data = []
+
+    for consumable in approved_consumable:
+        approved_amount = consumable.calculate_total_price()
+        total_paid = consumable.total_paid()
+        balance = approved_amount - total_paid
+        total_remaining += balance
+        
+        if consumable.details.exists():
+            loan_term_months = consumable.details.first().loan_term_months
+        else:
+            loan_term_months = 1
+        
+        monthly_payment = approved_amount / loan_term_months
+
+        consumable_data.append({ 
+            'consumable': consumable,
+            'approved_amount': approved_amount,
+            'total_paid': total_paid,
+            'balance': balance,
+            'monthly_payment': monthly_payment,
+        })
 
     context = {
         'member': member,
@@ -96,16 +128,102 @@ def member_dashboard(request):
         'monthly_payment': monthly_payment,
         'loan_types': loan_types,
         'consumable_requests': consumable_requests,
-        'active_consumable': active_consumable,
-        'consumable_approved_amount': consumable_approved_amount,
-        'consumable_total_paid': consumable_total_paid,
-        'consumable_monthly_payment': consumable_monthly_payment,
-        'consumable_balance_remaining': consumable_balance_remaining,
+        'approved_consumable': consumable_data,
         'loanable_total': loanable_total,
         'investment_total': investment_total,
+        'approved_consumable': consumable_data,
+        'total_remaining': total_remaining,
     }
 
     return render(request, 'member/dashboard.html', context)
+
+
+
+@login_required
+def disabled_requests_page(request):
+    return render(request, 'member/disabled_requests.html', {
+        'message': "Loan or consumable requests are currently Not Available. Please check back later."
+    })
+
+# @login_required
+# def member_dashboard(request):
+#     try:
+#         member = Member.objects.get(member=request.user)
+#     except Member.DoesNotExist:
+#         return redirect('login')
+    
+#     loanable_total = Loanable.objects.filter(member=member).aggregate(
+#         total=Sum('amount')
+#     )['total'] or 0
+
+
+#     investment_total = Investment.objects.filter(member=member).aggregate(
+#         total=Sum('amount')
+#     )['total'] or 0
+
+#     today = date.today()
+#     current_month = today.month
+#     current_year = today.year
+
+#     # Get the date for the first day of the previous month
+#     first_day_of_current_month = date(current_year, current_month, 1)
+#     previous_month_date = first_day_of_current_month - relativedelta(months=4)
+#     previous_month = previous_month_date.month
+#     previous_year = previous_month_date.year
+
+#     monthly_saving = Savings.objects.filter( member=member,month__month=current_month,month__year=current_year).first()
+
+#     previous_monthly_saving = Savings.objects.filter(
+#         member=member,month__month=previous_month, month__year=previous_year).first()
+
+#     # Prefer approved loan, fallback to rejected if none
+#     active_loan = LoanRequest.objects.filter(member=member, status='approved').order_by('-approval_date').first()
+#     if not active_loan:
+#         active_loan = LoanRequest.objects.filter(member=member, status='rejected').order_by('-approval_date').first()
+
+#     loan_paid = loan_balance = monthly_payment = 0
+#     if active_loan and active_loan.status == 'approved':
+#         repaybacks = LoanRepayback.objects.filter(loan_request=active_loan)
+#         loan_paid = repaybacks.aggregate(total=Sum('amount_paid'))['total'] or 0
+#         loan_balance = active_loan.approved_amount - loan_paid
+#         monthly_payment = active_loan.monthly_payment
+
+#     loan_types = LoanType.objects.all()
+#     consumable_requests = ConsumableRequest.objects.filter(user=request.user) \
+#         .prefetch_related('details__item') \
+#         .order_by('-date_created')[:5]
+
+#     active_consumable = ConsumableRequest.objects.filter(user=request.user, status='Approved').order_by('-date_created').first()
+
+#     consumable_approved_amount = consumable_total_paid = consumable_monthly_payment = consumable_balance_remaining = 0
+#     if active_consumable:
+#         consumable_approved_amount = active_consumable.calculate_total_price()
+#         loan_term_months = active_consumable.details.first().loan_term_months if active_consumable.details.exists() else 1
+#         consumable_monthly_payment = consumable_approved_amount / loan_term_months
+#         consumable_total_paid = active_consumable.total_paid()
+#         consumable_balance_remaining = consumable_approved_amount - consumable_total_paid
+
+#     context = {
+#         'member': member,
+#         'total_savings': member.total_savings or 0,
+#         'monthly_saving': monthly_saving.month_saving if monthly_saving else 0,
+#         'previous_monthly_saving': previous_monthly_saving.month_saving if previous_monthly_saving else 0,
+#         'loan': active_loan,
+#         'loan_paid': loan_paid,
+#         'loan_balance': loan_balance,
+#         'monthly_payment': monthly_payment,
+#         'loan_types': loan_types,
+#         'consumable_requests': consumable_requests,
+#         'active_consumable': active_consumable,
+#         'consumable_approved_amount': consumable_approved_amount,
+#         'consumable_total_paid': consumable_total_paid,
+#         'consumable_monthly_payment': consumable_monthly_payment,
+#         'consumable_balance_remaining': consumable_balance_remaining,
+#         'loanable_total': loanable_total,
+#         'investment_total': investment_total,
+#     }
+
+#     return render(request, 'member/dashboard.html', context)
 
 
 def ajax_load_bank_code(request):
@@ -200,12 +318,6 @@ def member_request_consumable(request):
         return redirect('disabled_requests_page')
 
     user = request.user
-
-    # Check if user has any outstanding request
-    has_outstanding = ConsumableRequest.objects.filter(user=user, status__in=['Pending', 'Approved']).exists()
-    if has_outstanding:
-        messages.error(request, "You cannot request a new consumable while you have a pending or approved one.")
-        return redirect('member_dashboard')
 
     # Fetch available items
     items = Item.objects.filter(available=True)

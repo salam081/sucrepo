@@ -10,7 +10,8 @@ from django.db import transaction
 from django.db.models.functions import TruncMonth
 from django.db.models import Count, Sum, F, Q
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime,date
+
 from decimal import Decimal
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -83,9 +84,15 @@ def consumable_items(request):
                 item.save()
                 messages.success(request, 'Consumable item updated successfully')
                 return redirect('consumable_items')
+            
+            
         else:
-            messages.error(request, 'Item ID not provided.')
+            item = Item.objects.create(title=title,price=price,available=True)
+            item.save()
+            messages.success(request, 'Consumable item Created successfully')
             return redirect('consumable_items')
+            # messages.error(request, 'Item ID not provided.')
+            # return redirect('consumable_items')
     
     context = {'consumables': consumables}
     return render(request, "consumables/consumable_items.html", context)
@@ -253,19 +260,52 @@ def admin_edit_consumable_request(request, request_id):
     })
 
 
-
-
 def approve_consumable_request(request, request_id):
     consumable_request = get_object_or_404(ConsumableRequest, id=request_id)
-    
+
     if consumable_request.status != 'Pending':
         messages.warning(request, 'This request is already processed.')
     else:
         consumable_request.status = 'Approved'
         consumable_request.save()
-        messages.success(request, 'The request has been approved.')
-    
+
+        # Carry forward previous balance
+        previous = ConsumableRequest.objects.filter(
+            user=consumable_request.user, 
+            status='Approved'
+        ).exclude(id=consumable_request.id).order_by('-date_created').first()
+
+        previous_balance = 0
+        if previous:
+            previous_total = previous.calculate_total_price()
+            previous_paid = previous.total_paid()
+            previous_balance = previous_total - previous_paid
+
+        new_total = consumable_request.calculate_total_price()
+        final_total = new_total + previous_balance
+
+        PaybackConsumable.objects.create(
+            consumable_request=consumable_request,
+            amount_paid=0,
+            repayment_date=date.today(), 
+            balance_remaining=final_total
+        )
+
+        messages.success(request, 'The request has been approved and previous balance carried forward.')
     return redirect('consumable_requests_list')
+
+
+# def approve_consumable_request(request, request_id):
+#     consumable_request = get_object_or_404(ConsumableRequest, id=request_id)
+    
+#     if consumable_request.status != 'Pending':
+#         messages.warning(request, 'This request is already processed.')
+#     else:
+#         consumable_request.status = 'Approved'
+#         consumable_request.save()
+#         messages.success(request, 'The request has been approved.')
+    
+#     return redirect('consumable_requests_list')
 
 
 
@@ -487,29 +527,16 @@ def consumable_requests_by_month(request):
 
     # Convert dict to list of tuples for template: [(month, [details]), ...]
     grouped_list = sorted(grouped_by_month.items())
-
-    context = {
-        'grouped_list': grouped_list,
-    }
+    context = {'grouped_list': grouped_list,}
     return render(request, 'consumables/monthly_summary.html', context)
-
-from datetime import datetime
-from collections import defaultdict
-from django.db.models import Sum, F
-from .models import ConsumableRequestDetail
 
 def consumable_details(request, month):
     try:
         month_date = datetime.strptime(month, "%Y-%m")
     except ValueError:
         return render(request, "consumables/grouped_details.html", {"error": "Invalid month format."})
-
     # Filter common queryset for the month
-    monthly_qs = ConsumableRequestDetail.objects.filter(
-        date_created__year=month_date.year,
-        date_created__month=month_date.month
-    )
-
+    monthly_qs = ConsumableRequestDetail.objects.filter( date_created__year=month_date.year,date_created__month=month_date.month)
     # Totals by status within the selected month
     approved_total = monthly_qs.filter(
         request__status='Approved'

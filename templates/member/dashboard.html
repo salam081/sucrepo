@@ -157,16 +157,51 @@
 <br>
 <div class="col-md-12">
 <div class="card shadow-lg col-md-12 border-info mb-3">
-    <div class="card-header text-center text-info">Consumable Loan Summary</div>
-    <div class="card-body text-info">
-        {% if active_consumable %}
-        <p><strong>Approved Amount:</strong> ₦{{ consumable_approved_amount|floatformat:2 }}</p>
-        <p><strong>Monthly Payment:</strong> ₦{{ consumable_monthly_payment|floatformat:2 }}</p>
-        <p><strong>Total Paid:</strong> ₦{{ consumable_total_paid|floatformat:2 }}</p>
-        <p><strong>Remaining Balance:</strong> ₦{{ consumable_balance_remaining|floatformat:2 }}</p>
-        {% else %}
-        <p>You have no active consumable loans.</p>
-        {% endif %}
+    <div class="card-header text-center text-danger">Consumable Loan Summary</div>
+    <div class="card-body text-danger">
+  <table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Approved Amount</th>
+            <th>Monthly Payment</th>
+            <th>Paid</th>
+            <th>Remaining</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in approved_consumable %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>₦{{ item.approved_amount|floatformat:2 }}</td>
+            <td>₦{{ item.monthly_payment|floatformat:2 }}</td>
+            <td>₦{{ item.total_paid|floatformat:2 }}</td>
+            <td>₦{{ item.balance|floatformat:2 }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-center">You have no approved consumable requests.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<ul>
+    <!-- {% for item in approved_consumable %}
+        <li>
+           
+            Approved amount: ₦{{ item.approved_amount|floatformat:2 }}<br>
+            Monthly payment: ₦{{ item.monthly_payment|floatformat:2 }}<br>
+            Paid: ₦{{ item.total_paid|floatformat:2 }} <br>
+            Remaining: ₦{{ item.balance|floatformat:2 }} <br>
+        </li>
+
+    {% empty %}
+        <li>You have no approved consumable requests.</li>
+    {% endfor %} -->
+    <h4 class="text-primary">Total Remaining Balance For (All Approved Consumable) = ₦{{ total_remaining|floatformat:2 }}</h4>
+    </ul>
+
 
     </div>
 </div>

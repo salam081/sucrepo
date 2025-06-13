@@ -343,28 +343,35 @@ def distribute_savings(year, month, distribution_ratios=None):
     if distribution_ratios is None:
         distribution_ratios = {"loanable": Decimal("0.50"), "investment": Decimal("0.50")}
 
-    # Check if Loanable or Investment records already exist for that month
-    if Loanable.objects.filter(month__year=year, month__month=month).exists() or \
-       Investment.objects.filter(month__year=year, month__month=month).exists():
-        return "exists"  # Return flag
-    
     savings_this_month = Savings.objects.filter(month__year=year, month__month=month)
+
+    if not savings_this_month.exists():
+        return "no_savings"
+
     distributed_count = 0
 
     for saving in savings_this_month:
+        member = saving.member
+
+        already_loanable = Loanable.objects.filter(member=member, month=saving.month).exists()
+        already_investment = Investment.objects.filter(member=member, month=saving.month).exists()
+
+        if already_loanable or already_investment:
+            continue  # Skip this member, already distributed
+
         total = saving.month_saving
 
         loanable_amount = total * distribution_ratios.get("loanable", Decimal("0.00"))
         investment_amount = total * distribution_ratios.get("investment", Decimal("0.00"))
 
         Loanable.objects.create(
-            member=saving.member,
+            member=member,
             month=saving.month,
             amount=loanable_amount,
             total_amount=total
         )
         Investment.objects.create(
-            member=saving.member,
+            member=member,
             month=saving.month,
             amount=investment_amount,
             total_amount=total
@@ -373,7 +380,6 @@ def distribute_savings(year, month, distribution_ratios=None):
         distributed_count += 1
 
     return distributed_count
-
 
 def distribute_savings_form(request):
     if request.method == "POST":
