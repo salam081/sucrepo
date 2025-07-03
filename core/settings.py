@@ -28,6 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 # ALLOWED_HOSTS = ['cooperativeapp.onrender.com']
 
+CSRF_TRUSTED_ORIGINS = ['https://sucrepo.onrender.com']
 # CSRF_TRUSTED_ORIGINS = ['https://cooperativeapp.onrender.com']
 
 
